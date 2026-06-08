@@ -8,6 +8,57 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ── Leaderboard tab bar ── */
+    .lb-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 18px 24px 0;
+    }
+
+    .lb-tab-btn {
+      background: transparent;
+      border: 2px solid rgba(255, 255, 255, 0.18);
+      color: rgba(255, 255, 255, 0.55);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 600;
+      padding: 9px 22px;
+      border-radius: 50px;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .lb-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.85);
+      border-color: rgba(255, 255, 255, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .lb-tab-btn.active {
+      background: #ffffff;
+      color: #0a0a0a;
+      border-color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    /* Tinted active states per tab */
+    .lb-tab-btn[data-tab="london"].active {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+      color: #ffffff;
+    }
+
+    .lb-tab-btn[data-tab="newyork"].active {
+      background: #15803d;
+      border-color: #15803d;
+      color: #ffffff;
+    }
+  </style>
 </head>
 <body class="lb-page">
 
@@ -36,6 +87,13 @@
         </div>
       </div>
     </header>
+
+    <!-- Office filter tabs -->
+    <div class="lb-tabs">
+      <button class="lb-tab-btn active" data-tab="overall">🌍 Overall</button>
+      <button class="lb-tab-btn" data-tab="london">🇬🇧 London</button>
+      <button class="lb-tab-btn" data-tab="newyork">🗽 New York</button>
+    </div>
 
     <div class="lb-body" id="lbBody">
       <div class="lb-loading">Loading leaderboard…</div>

@@ -6,8 +6,8 @@
 ═══════════════════════════════════════════════════════════════ */
 
 const FIREBASE_URL  = 'https://kpfhunt-22237-default-rtdb.firebaseio.com';
-const QR_BASE_URL   = 'https://raghulsiva-kpf.github.io/KPF-Hunt/scan.html';
-const ADMIN_PASS    = 'KPF2026';
+const QR_BASE_URL   = 'https://raghulsiva2000.github.io/KPF-Hunt/scan.html';
+const ADMIN_PASS    = 'Kpf@Hunt#2026!Ld';
 const REFRESH_SEC   = 15;
 
 /* ─────────────────────────────────────────────────────────────

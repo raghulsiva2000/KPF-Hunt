@@ -1,8 +1,8 @@
-# KPF Hunt Game — v8.8
+# KPF Hunt Game — v8.10
 
 A complete multi-page QR-code check-in tracker. Players scan QR codes at up to 100 checkpoints, enter their name and office, and check-ins are stored in **Firebase Realtime Database** via the REST API. Admins monitor live via a password-protected dashboard. A TV-optimised leaderboard auto-updates every 5 seconds.
 
-Hosted on **GitHub Pages** at: `https://raghulsiva-kpf.github.io/KPF-Hunt/`
+Hosted on **GitHub Pages** at: `https://raghulsiva2000.github.io/KPF-Hunt/`
 
 ---
 
@@ -13,14 +13,14 @@ Hosted on **GitHub Pages** at: `https://raghulsiva-kpf.github.io/KPF-Hunt/`
 | `index.html` | Welcome/landing page — KPF branded, explains the game, links to leaderboard |
 | `scan.html` | Checkpoint scan page — name + office form, duplicate check, Firebase POST |
 | `admin.html` | Password-protected admin dashboard (sidebar layout) |
-| `leaderboard.html` | TV-optimised full-screen live leaderboard (dark theme) |
+| `leaderboard.html` | TV-optimised full-screen live leaderboard (dark theme) with Overall / London / New York tabs |
 | `print.html` | Print-ready grid of all 100 QR codes (5 per row) |
 | `print-qr.html` | **Dedicated QR print page — one QR per A4 page, 300×300px, portrait layout, 15mm content padding, QRCode.js generation** |
 | `deploy-to-github.html` | **Browser-based deployment tool — fetches files from KAI preview and pushes to GitHub via Contents API** |
 | `css/style.css` | All styles — index, scan, admin, leaderboard, print, animations, responsive |
 | `js/scan.js` | Scan page logic: QR param parsing, duplicate check, Firebase POST |
 | `js/admin.js` | Admin dashboard: login, stats, check-ins table, leaderboard, QR generator, CSV, clear |
-| `js/leaderboard.js` | TV leaderboard: Firebase poll every 5s, ranked rows with progress bars |
+| `js/leaderboard.js` | TV leaderboard: Firebase poll every 5s, ranked rows with progress bars, 3 office tabs |
 | `README.md` | This file |
 
 ---
@@ -46,7 +46,7 @@ TV opens leaderboard.html → js/leaderboard.js GETs data every 5s
 7. If not duplicate → POST to Firebase → success card with animated ✓
 
 ### Admin Flow
-1. Open `admin.html` → enter password `KPF2026`
+1. Open `admin.html` → enter the admin password (see Credentials section below)
 2. Session stored in `sessionStorage`
 3. Sidebar navigation: Overview, Check-ins, Leaderboard, QR Codes
 4. **Overview**: 4 stat cards + Top 10 players list
@@ -57,10 +57,15 @@ TV opens leaderboard.html → js/leaderboard.js GETs data every 5s
 
 ### Leaderboard (TV)
 1. Open `leaderboard.html` on a TV/large screen
-2. Dark background, all players ranked by checkpoints completed
-3. Tie-break: earliest last check-in time (finished first = higher rank)
-4. Top 3 get gold/silver/bronze styling
-5. Auto-updates every **5 seconds**
+2. Dark background, players ranked by checkpoints completed
+3. **Three tabs at the top:**
+   - **🌍 Overall** — all players combined (default)
+   - **🇬🇧 London** — only London office players
+   - **🗽 New York** — only New York office players
+4. Tab switching is purely client-side — no extra Firebase calls; filters the already-loaded data
+5. Tie-break: earliest last check-in time (finished first = higher rank)
+6. Top 3 get gold/silver/bronze styling
+7. Auto-updates every **5 seconds** (all tabs update together on each poll)
 
 ### Print QR Page (`print-qr.html`)
 1. Open `print-qr.html` in a browser
@@ -82,7 +87,7 @@ TV opens leaderboard.html → js/leaderboard.js GETs data every 5s
    - Fetches each file from the KAI preview server (`https://kai2.kpf.com/api/websites/buildasecure_c31780243d334a3184fdc69bf58f84f2/`)
    - Converts content to base64
    - Checks GitHub for an existing file SHA (to update vs. create)
-   - PUTs to `https://api.github.com/repos/raghulsiva-kpf/KPF-Hunt/contents/[filepath]`
+   - PUTs to `https://api.github.com/repos/raghulsiva2000/KPF-Hunt/contents/[filepath]`
 5. A scrollable dark console logs every step with timestamps and colour-coded status
 6. File chips update in real time: pending → active → done/error
 7. A progress bar tracks overall completion
@@ -95,7 +100,7 @@ TV opens leaderboard.html → js/leaderboard.js GETs data every 5s
 
 | Role | URL | Password |
 |---|---|---|
-| Admin | `admin.html` | `KPF2026` |
+| Admin | `admin.html` | *(set in `js/admin.js` → `ADMIN_PASS`)* |
 
 No player passwords — players only enter their name and select their office.
 
@@ -135,7 +140,7 @@ DELETE https://kpfhunt-22237-default-rtdb.firebaseio.com/checkins.json
 
 QR codes point to:
 ```
-https://raghulsiva-kpf.github.io/KPF-Hunt/scan.html?qr=N
+https://raghulsiva2000.github.io/KPF-Hunt/scan.html?qr=N
 ```
 Where N = 1 to 100.
 
@@ -178,21 +183,23 @@ No CSS framework — pure CSS only.
 ## ✏️ How to Edit
 
 ### Change the admin password
-In `js/admin.js`, line ~10:
+In `js/admin.js`, find:
 ```js
-const ADMIN_PASS = 'KPF2026';
+const ADMIN_PASS = '...';
 ```
+Replace the value with the new password. Do not commit plaintext passwords to public repos.
 
 ### Add offices
 1. Add `<option>` in `scan.html`
 2. Add `filter-select` option in `admin.html`
 3. Add a new badge CSS class in `css/style.css` (copy `.badge-london`)
 4. Update `officeBadge()` in `js/admin.js` and `js/leaderboard.js`
+5. Add a new tab button in `leaderboard.html` and handle the new `data-tab` value in `js/leaderboard.js` → `buildFilteredLeaderboard()`
 
 ### Change the QR base URL
 In `js/admin.js`, `print.html`, and `print-qr.html`:
 ```js
-const QR_BASE_URL = 'https://raghulsiva-kpf.github.io/KPF-Hunt/scan.html';
+const QR_BASE_URL = 'https://raghulsiva2000.github.io/KPF-Hunt/scan.html';
 ```
 
 ### Change auto-refresh intervals
@@ -237,11 +244,16 @@ const FIREBASE_URL = 'https://your-project-default-rtdb.firebaseio.com';
 ### Change deploy target repo / KAI source (deploy-to-github.html)
 At the top of the inline `<script>` in `deploy-to-github.html`:
 ```js
-const GITHUB_REPO = 'raghulsiva-kpf/KPF-Hunt';   // target repo
+const GITHUB_REPO = 'raghulsiva2000/KPF-Hunt';   // target repo
 const KAI_BASE    = 'https://kai2.kpf.com/api/websites/buildasecure_c31780243d334a3184fdc69bf58f84f2/';
 const DEPLOY_DELAY = 400; // ms between files
 ```
 Edit `FILES` array to add/remove files from the deploy manifest.
+
+### Add a new leaderboard tab
+1. In `leaderboard.html`, add a new `<button class="lb-tab-btn" data-tab="yourkey">…</button>` inside `.lb-tabs`
+2. In `js/leaderboard.js`, add a new `else if (tab === 'yourkey')` branch inside `buildFilteredLeaderboard()` that filters `data` by the desired office value
+3. Optionally add a tinted `.lb-tab-btn[data-tab="yourkey"].active` rule in the `<style>` block of `leaderboard.html`
 
 ---
 
@@ -255,6 +267,8 @@ Edit `FILES` array to add/remove files from the deploy manifest.
 | **Case-insensitive duplicate** | Name comparison is `.toLowerCase()` — "John" and "john" are treated as the same player. |
 | **Firebase null** | Firebase returns `null` (not `{}`) when empty. All three JS files handle this with `json ? Object.values(json) : []`. |
 | **Leaderboard tie-break** | If two players have the same checkpoint count, the one whose last check-in was earlier ranks higher (they finished first). |
+| **Leaderboard tabs** | Tab switching re-filters `allData` client-side — no extra Firebase fetch. The 5-second poll always refreshes all tabs simultaneously. The `lbTotalPlayers` stat reflects the currently active tab's player count; `lbTotalCheckins` always shows the total raw check-in count across all offices. |
+| **Leaderboard tab office matching** | The London tab filters `d.office?.toLowerCase() === 'london'`; New York filters `d.office?.toLowerCase() === 'new york'`. This is case-insensitive so minor capitalisation differences in stored data are handled gracefully. |
 | **print.html** | Generates all 100 QR codes lazily via `api.qrserver.com` (`loading="lazy"`). Give it a moment to load before printing. |
 | **print-qr.html** | Generates all 100 QR codes client-side via **QRCode.js** (`cdnjs.cloudflare.com`). Renders a `<canvas>` element at 300×300px with `CorrectLevel.M`. `@page { margin: 0 }` suppresses the browser's date/title/URL header and footer. `padding: 15mm` on `.page` keeps content 15mm from each edge. Each page displays the QR code and "Checkpoint N" label only. |
 | **Admin sidebar** | Collapses to a hamburger on screens ≤ 900px. Click ☰ to open. |
@@ -271,7 +285,7 @@ Edit `FILES` array to add/remove files from the deploy manifest.
 ├── index.html              ← Welcome page
 ├── scan.html               ← QR scan / check-in page
 ├── admin.html              ← Admin dashboard
-├── leaderboard.html        ← TV leaderboard
+├── leaderboard.html        ← TV leaderboard (with Overall / London / New York tabs)
 ├── print.html              ← Print all 100 QR codes (grid, via qrserver.com)
 ├── print-qr.html           ← Print all 100 QR codes (one per A4 page, via QRCode.js)
 ├── deploy-to-github.html   ← Browser-based GitHub deploy tool
@@ -285,9 +299,9 @@ Edit `FILES` array to add/remove files from the deploy manifest.
 ```
 
 **GitHub Pages:**
-1. Push repo to `raghulsiva-kpf/KPF-Hunt`
+1. Push repo to `raghulsiva2000/KPF-Hunt`
 2. Settings → Pages → Deploy from branch (main / root)
-3. Site live at `https://raghulsiva-kpf.github.io/KPF-Hunt/`
+3. Site live at `https://raghulsiva2000.github.io/KPF-Hunt/`
 4. Open `admin.html` → log in → go to QR Codes → Print All 100
 5. Or open `print-qr.html` directly → click **🖨️ Print All** for one-per-page A4 sheets
 6. Post QR codes at checkpoints
@@ -325,3 +339,5 @@ Edit `FILES` array to add/remove files from the deploy manifest.
 | **v8.6** | **`print-qr.html` complete rewrite. QR generation switched back to QRCode.js (`cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js`). `new QRCode(div, { text, width: 300, height: 300, correctLevel: QRCode.CorrectLevel.M })`. Print CSS uses `@page { margin: 15mm }` with `.page { width: 100%; height: auto; min-height: calc(297mm - 30mm) }`. Screen `.page` is 210mm wide, auto height. `.qr-label` is 1.8rem bold, margin-top: 20px. Google Charts API removed entirely.** |
 | **v8.7** | **`print-qr.html` print CSS fix: `@page` moved outside `@media print` and set to `margin: 0` — suppresses browser-generated header/footer (date, title, URL) when printing. `.page` inside `@media print` now uses `padding: 15mm` (replaces the old `@page` margin) to keep content 15mm from each edge. `.page` set to fixed `height: 297mm` (not `min-height`). No other changes.** |
 | **v8.8** | **URL-only update. Firebase URL changed from `kpfhunt-default-rtdb.firebaseio.com` to `kpfhunt-22237-default-rtdb.firebaseio.com` in `js/scan.js`, `js/admin.js`, and `js/leaderboard.js`. GitHub Pages base URL changed from `grahesh-dev.github.io/kpf-hunt` to `raghulsiva-kpf.github.io/KPF-Hunt` in `js/admin.js` (`QR_BASE_URL`) and `print-qr.html` (`QR_BASE_URL`). No logic, UI, or functionality changes.** |
+| **v8.9** | **URL-only update. GitHub Pages base URL changed from `raghulsiva-kpf.github.io/KPF-Hunt` to `raghulsiva2000.github.io/KPF-Hunt` in `js/admin.js` (`QR_BASE_URL`) and `print-qr.html` (`QR_BASE_URL`). `js/scan.js` and `js/leaderboard.js` contained no GitHub Pages URL references — no changes needed there. No logic, UI, or functionality changes.** |
+| **v8.10** | **Two changes: (1) Admin password updated in `js/admin.js` — `ADMIN_PASS` value replaced; password not documented here. (2) Leaderboard tabs added — `leaderboard.html` gains a 3-button tab bar (🌍 Overall / 🇬🇧 London / 🗽 New York); `js/leaderboard.js` gains `activeTab` state, tab-click handlers, and `buildFilteredLeaderboard()` which filters the already-loaded `allData` by office before passing to `buildLeaderboard()`. No new Firebase calls. Tab styles inlined in `leaderboard.html`. No other files changed.** |

@@ -1,8 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════
-   KPF Hunt — leaderboard.js  v8
+   KPF Hunt — leaderboard.js  v8.10
    TV/large-screen live leaderboard.
    Fetches from Firebase every 5 seconds.
-   Shows ALL players ranked by checkpoints completed.
+   Shows players ranked by checkpoints completed.
+   Three tabs: Overall / London / New York — purely client-side filter.
    Tie-break: earliest last check-in time.
 ═══════════════════════════════════════════════════════════════ */
 
@@ -15,10 +16,30 @@ const lbTotalPlayers = document.getElementById('lbTotalPlayers');
 const lbTotalCheckins= document.getElementById('lbTotalCheckins');
 const lbLiveText     = document.getElementById('lbLiveText');
 const lbLastUpdated  = document.getElementById('lbLastUpdated');
+const tabButtons     = document.querySelectorAll('.lb-tab-btn');
 
-let lastUpdated = null;
-let secondsAgo  = 0;
-let tickTimer   = null;
+/* ── State ── */
+let lastUpdated  = null;
+let secondsAgo   = 0;
+let tickTimer    = null;
+let allData      = [];          // raw check-in records from Firebase
+let activeTab    = 'overall';   // 'overall' | 'london' | 'newyork'
+
+/* ─────────────────────────────────────────────────────────────
+   TAB SWITCHING
+───────────────────────────────────────────────────────────────*/
+tabButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeTab = btn.dataset.tab;
+
+    // Update active class
+    tabButtons.forEach(b => b.classList.toggle('active', b === btn));
+
+    // Re-render with current data, no new fetch needed
+    const lb = buildFilteredLeaderboard(allData, activeTab);
+    renderLeaderboard(lb, allData.length);
+  });
+});
 
 /* ─────────────────────────────────────────────────────────────
    FETCH + RENDER
@@ -27,10 +48,10 @@ async function fetchAndRender() {
   try {
     const res  = await fetch(`${FIREBASE_URL}/checkins.json`);
     const json = await res.json();
-    const data = json ? Object.values(json) : [];
+    allData = json ? Object.values(json) : [];
 
-    const lb = buildLeaderboard(data);
-    renderLeaderboard(lb, data.length);
+    const lb = buildFilteredLeaderboard(allData, activeTab);
+    renderLeaderboard(lb, allData.length);
 
     lastUpdated = new Date();
     secondsAgo  = 0;
@@ -42,8 +63,19 @@ async function fetchAndRender() {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   BUILD LEADERBOARD
+   BUILD LEADERBOARD (with optional office filter)
 ───────────────────────────────────────────────────────────────*/
+function buildFilteredLeaderboard(data, tab) {
+  // Filter raw check-ins by office when a specific tab is active
+  let filtered = data;
+  if (tab === 'london') {
+    filtered = data.filter(d => d.office?.toLowerCase() === 'london');
+  } else if (tab === 'newyork') {
+    filtered = data.filter(d => d.office?.toLowerCase() === 'new york');
+  }
+  return buildLeaderboard(filtered);
+}
+
 function buildLeaderboard(data) {
   const map = {};
 
@@ -74,11 +106,16 @@ function buildLeaderboard(data) {
    RENDER
 ───────────────────────────────────────────────────────────────*/
 function renderLeaderboard(lb, totalCheckins) {
+  // lbTotalPlayers reflects the current tab's player count
   lbTotalPlayers.textContent  = lb.length;
   lbTotalCheckins.textContent = totalCheckins;
 
   if (lb.length === 0) {
-    lbBody.innerHTML = '<div class="lb-loading">No check-ins yet. Waiting for players…</div>';
+    const tabLabel = activeTab === 'london' ? 'London' : activeTab === 'newyork' ? 'New York' : null;
+    const msg = tabLabel
+      ? `No check-ins from ${tabLabel} yet. Waiting for players…`
+      : 'No check-ins yet. Waiting for players…';
+    lbBody.innerHTML = `<div class="lb-loading">${msg}</div>`;
     return;
   }
 
