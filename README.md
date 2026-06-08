@@ -1,8 +1,8 @@
-# KPF Hunt Game — v8.7
+# KPF Hunt Game — v8.8
 
 A complete multi-page QR-code check-in tracker. Players scan QR codes at up to 100 checkpoints, enter their name and office, and check-ins are stored in **Firebase Realtime Database** via the REST API. Admins monitor live via a password-protected dashboard. A TV-optimised leaderboard auto-updates every 5 seconds.
 
-Hosted on **GitHub Pages** at: `https://grahesh-dev.github.io/kpf-hunt/`
+Hosted on **GitHub Pages** at: `https://raghulsiva-kpf.github.io/KPF-Hunt/`
 
 ---
 
@@ -105,12 +105,12 @@ No player passwords — players only enter their name and select their office.
 
 **Database URL (hardcoded in `js/scan.js`, `js/admin.js`, `js/leaderboard.js`):**
 ```
-https://kpfhunt-default-rtdb.firebaseio.com
+https://kpfhunt-22237-default-rtdb.firebaseio.com
 ```
 
 ### POST (check-in submission — `scan.js`)
 ```
-POST https://kpfhunt-default-rtdb.firebaseio.com/checkins.json
+POST https://kpfhunt-22237-default-rtdb.firebaseio.com/checkins.json
 Body: JSON — NO Content-Type header (avoids CORS preflight)
 
 { "name": "John Smith", "office": "London", "checkpoint": "Checkpoint 5", "timestamp": "ISO" }
@@ -118,13 +118,13 @@ Body: JSON — NO Content-Type header (avoids CORS preflight)
 
 ### GET (fetch all — `admin.js` + `leaderboard.js`)
 ```
-GET https://kpfhunt-default-rtdb.firebaseio.com/checkins.json
+GET https://kpfhunt-22237-default-rtdb.firebaseio.com/checkins.json
 ```
 Returns `null` when empty. Both files handle `null` gracefully → `[]`.
 
 ### DELETE (clear all — admin only)
 ```
-DELETE https://kpfhunt-default-rtdb.firebaseio.com/checkins.json
+DELETE https://kpfhunt-22237-default-rtdb.firebaseio.com/checkins.json
 ```
 
 > ⚠️ **Firebase Rules**: Ensure your Firebase Realtime Database rules allow public read/write.
@@ -135,7 +135,7 @@ DELETE https://kpfhunt-default-rtdb.firebaseio.com/checkins.json
 
 QR codes point to:
 ```
-https://grahesh-dev.github.io/kpf-hunt/scan.html?qr=N
+https://raghulsiva-kpf.github.io/KPF-Hunt/scan.html?qr=N
 ```
 Where N = 1 to 100.
 
@@ -169,7 +169,7 @@ No CSS framework — pure CSS only.
 | Google Fonts — JetBrains Mono | Table/data font | `fonts.googleapis.com` |
 | QR Server API | QR code image generation (admin/print.html) | `api.qrserver.com` |
 | **QRCode.js** | **QR code generation (print-qr.html) — client-side canvas rendering** | `cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js` |
-| Firebase Realtime Database | Backend data store | `kpfhunt-default-rtdb.firebaseio.com` (REST API) |
+| Firebase Realtime Database | Backend data store | `kpfhunt-22237-default-rtdb.firebaseio.com` (REST API) |
 
 > `deploy-to-github.html` uses no external libraries — only the native `fetch` API and `btoa`/`TextEncoder` for base64 encoding.
 
@@ -192,7 +192,7 @@ const ADMIN_PASS = 'KPF2026';
 ### Change the QR base URL
 In `js/admin.js`, `print.html`, and `print-qr.html`:
 ```js
-const QR_BASE_URL = 'https://grahesh-dev.github.io/kpf-hunt/scan.html';
+const QR_BASE_URL = 'https://raghulsiva-kpf.github.io/KPF-Hunt/scan.html';
 ```
 
 ### Change auto-refresh intervals
@@ -285,9 +285,9 @@ Edit `FILES` array to add/remove files from the deploy manifest.
 ```
 
 **GitHub Pages:**
-1. Push repo to `grahesh-dev/kpf-hunt`
+1. Push repo to `raghulsiva-kpf/KPF-Hunt`
 2. Settings → Pages → Deploy from branch (main / root)
-3. Site live at `https://grahesh-dev.github.io/kpf-hunt/`
+3. Site live at `https://raghulsiva-kpf.github.io/KPF-Hunt/`
 4. Open `admin.html` → log in → go to QR Codes → Print All 100
 5. Or open `print-qr.html` directly → click **🖨️ Print All** for one-per-page A4 sheets
 6. Post QR codes at checkpoints
@@ -324,3 +324,4 @@ Edit `FILES` array to add/remove files from the deploy manifest.
 | **v8.5** | **`print-qr.html` QR generation switched from QRCode.js (client-side canvas library) to Google Charts QR API (`chart.googleapis.com`) — plain `<img>` tags with no JS library dependency. Fixes QR codes not scanning. Uses `chld=H\|0` for highest error correction. QRCode.js `<script>` tag removed entirely.** |
 | **v8.6** | **`print-qr.html` complete rewrite. QR generation switched back to QRCode.js (`cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js`). `new QRCode(div, { text, width: 300, height: 300, correctLevel: QRCode.CorrectLevel.M })`. Print CSS uses `@page { margin: 15mm }` with `.page { width: 100%; height: auto; min-height: calc(297mm - 30mm) }`. Screen `.page` is 210mm wide, auto height. `.qr-label` is 1.8rem bold, margin-top: 20px. Google Charts API removed entirely.** |
 | **v8.7** | **`print-qr.html` print CSS fix: `@page` moved outside `@media print` and set to `margin: 0` — suppresses browser-generated header/footer (date, title, URL) when printing. `.page` inside `@media print` now uses `padding: 15mm` (replaces the old `@page` margin) to keep content 15mm from each edge. `.page` set to fixed `height: 297mm` (not `min-height`). No other changes.** |
+| **v8.8** | **URL-only update. Firebase URL changed from `kpfhunt-default-rtdb.firebaseio.com` to `kpfhunt-22237-default-rtdb.firebaseio.com` in `js/scan.js`, `js/admin.js`, and `js/leaderboard.js`. GitHub Pages base URL changed from `grahesh-dev.github.io/kpf-hunt` to `raghulsiva-kpf.github.io/KPF-Hunt` in `js/admin.js` (`QR_BASE_URL`) and `print-qr.html` (`QR_BASE_URL`). No logic, UI, or functionality changes.** |

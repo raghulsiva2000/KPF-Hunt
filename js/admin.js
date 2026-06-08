@@ -5,8 +5,8 @@
             auto-refresh, sidebar nav, filters, sorting
 ═══════════════════════════════════════════════════════════════ */
 
-const FIREBASE_URL  = 'https://kpfhunt-default-rtdb.firebaseio.com';
-const QR_BASE_URL   = 'https://grahesh-dev.github.io/kpf-hunt/scan.html';
+const FIREBASE_URL  = 'https://kpfhunt-22237-default-rtdb.firebaseio.com';
+const QR_BASE_URL   = 'https://raghulsiva-kpf.github.io/KPF-Hunt/scan.html';
 const ADMIN_PASS    = 'KPF2026';
 const REFRESH_SEC   = 15;
 

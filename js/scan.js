@@ -4,7 +4,7 @@
             Firebase POST (no Content-Type header), success/error UI
 ═══════════════════════════════════════════════════════════════ */
 
-const FIREBASE_URL = 'https://kpfhunt-default-rtdb.firebaseio.com';
+const FIREBASE_URL = 'https://kpfhunt-22237-default-rtdb.firebaseio.com';
 
 /* ── DOM refs ── */
 const invalidCard  = document.getElementById('invalidCard');

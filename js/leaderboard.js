@@ -6,7 +6,7 @@
    Tie-break: earliest last check-in time.
 ═══════════════════════════════════════════════════════════════ */
 
-const FIREBASE_URL  = 'https://kpfhunt-default-rtdb.firebaseio.com';
+const FIREBASE_URL  = 'https://kpfhunt-22237-default-rtdb.firebaseio.com';
 const POLL_INTERVAL = 5000; // 5 seconds
 
 /* ── DOM refs ── */
