@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deploy KPF-Hunt to GitHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #f5f7fb;
+      --card-bg:     #ffffff;
+      --border:      #e2e8f0;
+      --text:        #1a202c;
+      --text-muted:  #64748b;
+      --accent:      #1d4ed8;
+      --accent-dark: #1e3a8a;
+      --accent-light:#dbeafe;
+      --danger:      #dc2626;
+      --success:     #15803d;
+      --console-bg:  #0f1117;
+      --radius-sm:   6px;
+      --radius-md:   10px;
+      --radius-lg:   16px;
+      --shadow:      0 2px 12px rgba(0,0,0,0.08);
+      --shadow-lg:   0 8px 32px rgba(0,0,0,0.12);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── Layout ───────────────────────────────────────────────── */
+    .page-wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 48px 20px 64px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 680px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+
+    /* ── Header ───────────────────────────────────────────────── */
+    .card-header {
+      padding: 32px 36px 28px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+      color: #fff;
+    }
+
+    .card-header .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .card-header .logo-icon {
+      width: 44px;
+      height: 44px;
+      background: rgba(255,255,255,0.15);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .card-header h1 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .card-header p {
+      font-size: 0.875rem;
+      color: rgba(255,255,255,0.75);
+      margin-top: 4px;
+    }
+
+    .repo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 14px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: rgba(255,255,255,0.9);
+    }
+
+    /* ── Body ─────────────────────────────────────────────────── */
+    .card-body {
+      padding: 32px 36px;
+    }
+
+    /* ── Token Input ──────────────────────────────────────────── */
+    .field {
+      margin-bottom: 24px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .field .hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .field .hint a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .field .hint a:hover {
+      text-decoration: underline;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap input {
+      width: 100%;
+      padding: 11px 44px 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text);
+      background: #fafafa;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+
+    .input-wrap input:focus {
+      border-color: var(--accent);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(29,78,216,0.1);
+    }
+
+    .toggle-visibility {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 16px;
+      padding: 4px;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+
+    .toggle-visibility:hover { color: var(--text); }
+
+    /* ── File List ────────────────────────────────────────────── */
+    .files-section {
+      margin-bottom: 24px;
+    }
+
+    .files-section .section-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .file-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      background: var(--accent-light);
+      color: var(--accent-dark);
+      border-radius: 999px;
+      font-size: 0.775rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .chip.done    { background: #dcfce7; color: #15803d; }
+    .chip.error   { background: #fee2e2; color: #dc2626; }
+    .chip.active  { background: #fef9c3; color: #854d0e; }
+
+    /* ── Deploy Button ────────────────────────────────────────── */
+    .btn-deploy {
+      width: 100%;
+      padding: 14px 24px;
+      background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 14px rgba(29,78,216,0.35);
+      margin-bottom: 28px;
+    }
+
+    .btn-deploy:hover:not(:disabled) {
+      opacity: 0.92;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(29,78,216,0.4);
+    }
+
+    .btn-deploy:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn-deploy:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Progress Bar ─────────────────────────────────────────── */
+    .progress-wrap {
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .progress-wrap.visible { display: block; }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .progress-bar-track {
+      height: 6px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #1d4ed8, #3b82f6);
+      border-radius: 999px;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    /* ── Console ──────────────────────────────────────────────── */
+    .console-wrap {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid #2d2d3a;
+    }
+
+    .console-titlebar {
+      background: #1e1e2e;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .console-titlebar .dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .console-titlebar .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .dot-red   { background: #ff5f57; }
+    .dot-yellow{ background: #ffbd2e; }
+    .dot-green { background: #28c840; }
+
+    .console-titlebar .console-title {
+      font-size: 0.8rem;
+      color: #8b8b9e;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .console-titlebar .btn-clear-log {
+      background: none;
+      border: 1px solid #3d3d52;
+      border-radius: var(--radius-sm);
+      color: #8b8b9e;
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .console-titlebar .btn-clear-log:hover {
+      color: #c8c8d8;
+      border-color: #5a5a78;
+    }
+
+    .console-log {
+      background: var(--console-bg);
+      height: 400px;
+      overflow-y: auto;
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      scroll-behavior: smooth;
+    }
+
+    .console-log::-webkit-scrollbar { width: 6px; }
+    .console-log::-webkit-scrollbar-track { background: #1a1a2e; }
+    .console-log::-webkit-scrollbar-thumb { background: #3d3d5c; border-radius: 3px; }
+
+    .log-line {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 1px 0;
+    }
+
+    .log-line + .log-line { border-top: none; }
+
+    .log-ts {
+      color: #4a4a6a;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .log-msg { word-break: break-all; }
+
+    .log-info    .log-msg { color: #e2c97e; }
+    .log-success .log-msg { color: #4ade80; }
+    .log-error   .log-msg { color: #f87171; }
+    .log-dim     .log-msg { color: #6b7280; }
+    .log-bold    .log-msg { color: #93c5fd; font-weight: 500; }
+
+    .console-empty {
+      color: #3d3d5c;
+      font-style: italic;
+      padding: 4px 0;
+    }
+
+    /* ── Result Banner ────────────────────────────────────────── */
+    .result-banner {
+      display: none;
+      margin-top: 20px;
+      padding: 16px 20px;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .result-banner.success {
+      display: block;
+      background: #dcfce7;
+      border: 1px solid #86efac;
+      color: #14532d;
+    }
+
+    .result-banner.partial {
+      display: block;
+      background: #fef9c3;
+      border: 1px solid #fde047;
+      color: #713f12;
+    }
+
+    .result-banner a {
+      color: inherit;
+      font-weight: 600;
+      text-decoration: underline;
+    }
+
+    .result-banner .banner-title {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── Footer note ──────────────────────────────────────────── */
+    .footer-note {
+      margin-top: 28px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .footer-note a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .footer-note a:hover { text-decoration: underline; }
+
+    /* ── Responsive ───────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .page-wrap { padding: 24px 12px 48px; }
+      .card-header, .card-body { padding-left: 20px; padding-right: 20px; }
+      .card-header { padding-top: 24px; padding-bottom: 20px; }
+      .card-body { padding-top: 24px; }
+      .console-log { height: 300px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <div class="card">
+
+    <!-- ── Header ── -->
+    <div class="card-header">
+      <div class="logo-row">
+        <div class="logo-icon">🚀</div>
+        <div>
+          <h1>Deploy KPF-Hunt to GitHub</h1>
+          <p>Push all project files to your GitHub repository via the Contents API</p>
+        </div>
+      </div>
+      <div class="repo-badge">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+        raghulsiva-kpf / KPF-Hunt
+      </div>
+    </div>
+
+    <!-- ── Body ── -->
+    <div class="card-body">
+
+      <!-- Token field -->
+      <div class="field">
+        <label for="token-input">GitHub Personal Access Token</label>
+        <div class="input-wrap">
+          <input
+            type="password"
+            id="token-input"
+            placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button class="toggle-visibility" id="toggle-token" title="Show/hide token" aria-label="Toggle token visibility">
+            👁
+          </button>
+        </div>
+        <p class="hint">
+          Needs <strong>repo</strong> scope.
+          <a href="https://github.com/settings/tokens/new?scopes=repo&description=KPF-Hunt+Deploy" target="_blank" rel="noopener">
+            Create a token ↗
+          </a>
+        </p>
+      </div>
+
+      <!-- File list -->
+      <div class="files-section">
+        <div class="section-label">Files to deploy (11 files)</div>
+        <div class="file-chips" id="file-chips">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <!-- Deploy button -->
+      <button class="btn-deploy" id="btn-deploy">
+        <span id="btn-icon">🚀</span>
+        <span id="btn-label">Deploy to GitHub</span>
+      </button>
+
+      <!-- Progress bar -->
+      <div class="progress-wrap" id="progress-wrap">
+        <div class="progress-labels">
+          <span id="progress-label">Deploying…</span>
+          <span id="progress-count">0 / 11</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+      </div>
+
+      <!-- Console -->
+      <div class="console-wrap">
+        <div class="console-titlebar">
+          <div class="dots">
+            <span class="dot dot-red"></span>
+            <span class="dot dot-yellow"></span>
+            <span class="dot dot-green"></span>
+          </div>
+          <span class="console-title">deploy-log</span>
+          <button class="btn-clear-log" id="btn-clear-log">clear</button>
+        </div>
+        <div class="console-log" id="console-log">
+          <div class="console-empty">Waiting for deployment to start…</div>
+        </div>
+      </div>
+
+      <!-- Result banner -->
+      <div class="result-banner" id="result-banner"></div>
+
+    </div><!-- /card-body -->
+  </div><!-- /card -->
+
+  <p class="footer-note">
+    Token is used only in this browser session and never stored or transmitted anywhere except GitHub's API.
+    &nbsp;·&nbsp;
+    <a href="https://github.com/raghulsiva-kpf/KPF-Hunt" target="_blank" rel="noopener">Open repo ↗</a>
+  </p>
+</div><!-- /page-wrap -->
+
+<script>
+  /* ═══════════════════════════════════════════════════════════
+     CONFIGURATION
+  ═══════════════════════════════════════════════════════════ */
+  const GITHUB_REPO  = 'raghulsiva-kpf/KPF-Hunt';
+  const GITHUB_API   = 'https://api.github.com';
+  const KAI_BASE     = 'https://kai2.kpf.com/api/websites/buildasecure_c31780243d334a3184fdc69bf58f84f2/';
+  const DEPLOY_DELAY = 400; // ms between files — avoids GitHub secondary rate limits
+
+  const FILES = [
+    'index.html',
+    'scan.html',
+    'admin.html',
+    'leaderboard.html',
+    'print.html',
+    'print-qr.html',
+    'js/leaderboard.js',
+    'js/tracker.js',
+    'js/scan.js',
+    'js/admin.js',
+    'css/style.css',
+  ];
+
+  /* ═══════════════════════════════════════════════════════════
+     DOM REFS
+  ═══════════════════════════════════════════════════════════ */
+  const tokenInput    = document.getElementById('token-input');
+  const toggleToken   = document.getElementById('toggle-token');
+  const btnDeploy     = document.getElementById('btn-deploy');
+  const btnIcon       = document.getElementById('btn-icon');
+  const btnLabel      = document.getElementById('btn-label');
+  const consoleLog    = document.getElementById('console-log');
+  const btnClearLog   = document.getElementById('btn-clear-log');
+  const progressWrap  = document.getElementById('progress-wrap');
+  const progressFill  = document.getElementById('progress-fill');
+  const progressLabel = document.getElementById('progress-label');
+  const progressCount = document.getElementById('progress-count');
+  const resultBanner  = document.getElementById('result-banner');
+  const fileChipsEl   = document.getElementById('file-chips');
+
+  /* ═══════════════════════════════════════════════════════════
+     CHIP SETUP
+  ═══════════════════════════════════════════════════════════ */
+  const chipMap = {};
+  FILES.forEach(f => {
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.id = `chip-${f.replace(/[/\.]/g, '-')}`;
+    chip.textContent = f;
+    fileChipsEl.appendChild(chip);
+    chipMap[f] = chip;
+  });
+
+  function setChipState(file, state) {
+    const chip = chipMap[file];
+    if (!chip) return;
+    chip.className = 'chip ' + state;
+    if (state === 'done')   chip.textContent = '✓ ' + file;
+    if (state === 'error')  chip.textContent = '✗ ' + file;
+    if (state === 'active') chip.textContent = '⟳ ' + file;
+  }
+
+  function resetChips() {
+    FILES.forEach(f => {
+      const chip = chipMap[f];
+      if (chip) {
+        chip.className = 'chip';
+        chip.textContent = f;
+      }
+    });
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     CONSOLE LOGGING
+  ═══════════════════════════════════════════════════════════ */
+  let logEmpty = true;
+
+  function ts() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    const s = String(now.getSeconds()).padStart(2,'0');
+    return `[${h}:${m}:${s}]`;
+  }
+
+  function log(msg, type = 'info') {
+    if (logEmpty) {
+      consoleLog.innerHTML = '';
+      logEmpty = false;
+    }
+    const line = document.createElement('div');
+    line.className = `log-line log-${type}`;
+    line.innerHTML = `<span class="log-ts">${ts()}</span><span class="log-msg">${escHtml(msg)}</span>`;
+    consoleLog.appendChild(line);
+    consoleLog.scrollTop = consoleLog.scrollHeight;
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;');
+  }
+
+  btnClearLog.addEventListener('click', () => {
+    consoleLog.innerHTML = '<div class="console-empty">Log cleared.</div>';
+    logEmpty = false;
+  });
+
+  /* ═══════════════════════════════════════════════════════════
+     TOKEN VISIBILITY TOGGLE
+  ═══════════════════════════════════════════════════════════ */
+  let tokenVisible = false;
+  toggleToken.addEventListener('click', () => {
+    tokenVisible = !tokenVisible;
+    tokenInput.type = tokenVisible ? 'text' : 'password';
+    toggleToken.textContent = tokenVisible ? '🙈' : '👁';
+  });
+
+  /* ═══════════════════════════════════════════════════════════
+     PROGRESS HELPERS
+  ═══════════════════════════════════════════════════════════ */
+  function setProgress(done, total, label) {
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    progressFill.style.width = pct + '%';
+    progressCount.textContent = `${done} / ${total}`;
+    progressLabel.textContent = label || 'Deploying…';
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     UTILITIES
+  ═══════════════════════════════════════════════════════════ */
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Fetch a file from the KAI preview server.
+   * Returns the raw text content, or throws on failure.
+   */
+  async function fetchFromKAI(filepath) {
+    const url = KAI_BASE + filepath;
+    const resp = await fetch(url, { mode: 'cors' });
+    if (!resp.ok) {
+      throw new Error(`HTTP ${resp.status} fetching ${filepath} from KAI`);
+    }
+    return await resp.text();
+  }
+
+  /**
+   * Convert a UTF-8 string to base64 (handles unicode correctly).
+   */
+  function toBase64(str) {
+    // TextEncoder handles multi-byte chars; btoa needs binary string
+    const bytes = new TextEncoder().encode(str);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  }
+
+  /**
+   * Get the current SHA of a file in the repo (returns null if not found).
+   */
+  async function getFileSHA(filepath, token) {
+    const url = `${GITHUB_API}/repos/${GITHUB_REPO}/contents/${filepath}`;
+    const resp = await fetch(url, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+      }
+    });
+    if (resp.status === 404) return null;
+    if (!resp.ok) {
+      const body = await resp.text();
+      throw new Error(`GitHub GET ${filepath} → HTTP ${resp.status}: ${body}`);
+    }
+    const data = await resp.json();
+    return data.sha || null;
+  }
+
+  /**
+   * Push a single file to GitHub via the Contents API (create or update).
+   */
+  async function pushFileToGitHub(filepath, content, token) {
+    const url = `${GITHUB_API}/repos/${GITHUB_REPO}/contents/${filepath}`;
+    const b64  = toBase64(content);
+
+    // Check for existing file to get SHA
+    log(`  ↳ Checking for existing ${filepath}…`, 'dim');
+    const sha = await getFileSHA(filepath, token);
+    if (sha) {
+      log(`  ↳ File exists (SHA: ${sha.slice(0,7)}…) — will update`, 'dim');
+    } else {
+      log(`  ↳ File does not exist — will create`, 'dim');
+    }
+
+    const body = {
+      message: `Deploy ${filepath} via KAI`,
+      content: b64,
+    };
+    if (sha) body.sha = sha;
+
+    const resp = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!resp.ok) {
+      const errBody = await resp.text();
+      throw new Error(`GitHub PUT ${filepath} → HTTP ${resp.status}: ${errBody}`);
+    }
+
+    const result = await resp.json();
+    const action = result.content ? (sha ? 'updated' : 'created') : 'deployed';
+    return action;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     MAIN DEPLOY FLOW
+  ═══════════════════════════════════════════════════════════ */
+  btnDeploy.addEventListener('click', async () => {
+    const token = tokenInput.value.trim();
+
+    /* ── Validate ── */
+    if (!token) {
+      log('⚠️  Please enter a GitHub Personal Access Token first.', 'error');
+      tokenInput.focus();
+      return;
+    }
+    if (!token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
+      log('⚠️  Token format looks unexpected (should start with ghp_ or github_pat_).', 'info');
+      log('    Proceeding anyway — GitHub will reject it if invalid.', 'dim');
+    }
+
+    /* ── Reset UI ── */
+    resetChips();
+    resultBanner.className = 'result-banner';
+    resultBanner.innerHTML = '';
+    consoleLog.innerHTML = '';
+    logEmpty = false;
+
+    /* ── Disable button ── */
+    btnDeploy.disabled = true;
+    btnIcon.outerHTML = '<span class="spinner" id="btn-icon"></span>';
+    document.getElementById('btn-icon'); // re-ref not needed — just visual
+    btnLabel.textContent = 'Deploying…';
+
+    /* ── Show progress ── */
+    progressWrap.classList.add('visible');
+    setProgress(0, FILES.length, 'Starting deployment…');
+
+    log(`🚀 Starting deployment to ${GITHUB_REPO}`, 'bold');
+    log(`   Source: KAI preview server`, 'dim');
+    log(`   Files:  ${FILES.length}`, 'dim');
+    log('─'.repeat(52), 'dim');
+
+    let successCount = 0;
+    let errorCount   = 0;
+    const errors     = [];
+
+    /* ── Sequential file loop ── */
+    for (let i = 0; i < FILES.length; i++) {
+      const filepath = FILES[i];
+      setProgress(i, FILES.length, `Deploying ${filepath}…`);
+      setChipState(filepath, 'active');
+
+      log(`\n[${i+1}/${FILES.length}] ${filepath}`, 'bold');
+
+      try {
+        /* Step 1 — Fetch from KAI */
+        log(`  ↳ Fetching from KAI preview…`, 'dim');
+        const content = await fetchFromKAI(filepath);
+        const kb = (new TextEncoder().encode(content).length / 1024).toFixed(1);
+        log(`  ↳ Fetched ${kb} KB`, 'dim');
+
+        /* Step 2 — Push to GitHub */
+        const action = await pushFileToGitHub(filepath, content, token);
+        log(`  ✅ ${action.charAt(0).toUpperCase() + action.slice(1)} successfully`, 'success');
+
+        setChipState(filepath, 'done');
+        successCount++;
+
+      } catch (err) {
+        log(`  ❌ FAILED: ${err.message}`, 'error');
+        setChipState(filepath, 'error');
+        errors.push({ file: filepath, msg: err.message });
+        errorCount++;
+      }
+
+      setProgress(i + 1, FILES.length, i + 1 === FILES.length ? 'Done!' : `Deploying…`);
+
+      /* Polite delay between files */
+      if (i < FILES.length - 1) {
+        await sleep(DEPLOY_DELAY);
+      }
+    }
+
+    /* ── Final summary ── */
+    log('\n' + '─'.repeat(52), 'dim');
+    log(`Deployment complete: ${successCount} succeeded, ${errorCount} failed`, successCount === FILES.length ? 'success' : 'info');
+
+    if (errorCount === 0) {
+      log('✅ All files deployed successfully!', 'success');
+      log('   Enable GitHub Pages at:', 'success');
+      log(`   https://github.com/${GITHUB_REPO}/settings/pages`, 'success');
+
+      resultBanner.className = 'result-banner success';
+      resultBanner.innerHTML = `
+        <div class="banner-title">✅ All ${successCount} files deployed!</div>
+        Now enable GitHub Pages to go live:<br/>
+        <a href="https://github.com/${GITHUB_REPO}/settings/pages" target="_blank" rel="noopener">
+          → https://github.com/${GITHUB_REPO}/settings/pages ↗
+        </a>
+      `;
+    } else {
+      log(`⚠️  ${errorCount} file(s) failed — check errors above`, 'error');
+      errors.forEach(e => log(`   • ${e.file}: ${e.msg}`, 'error'));
+
+      resultBanner.className = 'result-banner partial';
+      resultBanner.innerHTML = `
+        <div class="banner-title">⚠️ Partial deployment: ${successCount}/${FILES.length} files succeeded</div>
+        ${errorCount} file(s) failed. Check the log above for details and retry.<br/>
+        <a href="https://github.com/${GITHUB_REPO}/settings/pages" target="_blank" rel="noopener">
+          → GitHub Pages settings ↗
+        </a>
+      `;
+    }
+
+    /* ── Re-enable button ── */
+    btnDeploy.disabled = false;
+    const iconEl = document.getElementById('btn-icon');
+    if (iconEl) {
+      iconEl.outerHTML = '<span id="btn-icon">🚀</span>';
+    } else {
+      // spinner was replaced, find by class
+      const spinner = btnDeploy.querySelector('.spinner');
+      if (spinner) spinner.outerHTML = '<span id="btn-icon">🚀</span>';
+    }
+    btnLabel.textContent = errorCount > 0 ? 'Retry Deploy' : 'Deploy Again';
+  });
+</script>
+</body>
+</html>

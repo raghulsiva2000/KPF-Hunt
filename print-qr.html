@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KPF Hunt — Print QR Codes</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- QRCode.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    /* ─── Reset ─────────────────────────────────────────── */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ─── Base ───────────────────────────────────────────── */
+    html, body {
+      font-family: 'Inter', sans-serif;
+      background: #f5f5f5;
+      color: #000;
+    }
+
+    /* ─── Screen-only toolbar ────────────────────────────── */
+    .toolbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      background: #fff;
+      border-bottom: 1px solid #e0e0e0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .toolbar-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #111;
+      letter-spacing: -0.01em;
+    }
+
+    .toolbar-sub {
+      font-size: 0.8rem;
+      color: #888;
+      font-weight: 400;
+    }
+
+    .btn-print {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      background: #000;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.18s ease, transform 0.12s ease;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-print:hover {
+      background: #222;
+      transform: translateY(-1px);
+    }
+
+    .btn-print:active {
+      transform: translateY(0);
+    }
+
+    /* ─── Page wrapper (screen spacer for toolbar) ───────── */
+    .pages-wrapper {
+      padding-top: 80px;
+    }
+
+    /* ─── Individual A4 page (screen preview) ────────────── */
+    .page {
+      width: 210mm;
+      height: auto;
+      min-height: 297mm;
+      margin: 20px auto;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      border-radius: 4px;
+    }
+
+    /* ─── QR code container ──────────────────────────────── */
+    .qr-wrap {
+      width: 300px;
+      height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* QRCode.js renders a <canvas> or <img> inside .qr-wrap */
+    .qr-wrap canvas,
+    .qr-wrap img {
+      display: block;
+      width: 300px !important;
+      height: 300px !important;
+    }
+
+    /* ─── Checkpoint label ───────────────────────────────── */
+    .qr-label {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #000;
+      text-align: center;
+      margin-top: 20px;
+      line-height: 1.2;
+      flex-shrink: 0;
+    }
+
+    /* ─── @page: outside @media print so it applies globally ── */
+    /* margin: 0 removes the browser's built-in header/footer   */
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
+    /* ─── Print media ────────────────────────────────────── */
+    @media print {
+      .toolbar {
+        display: none !important;
+      }
+
+      .pages-wrapper {
+        padding-top: 0;
+      }
+
+      /* padding: 15mm compensates for the zero @page margin   */
+      /* so content sits 15mm from each edge, not flush        */
+      .page {
+        width: 210mm;
+        height: 297mm;
+        padding: 15mm;
+        margin: 0;
+        box-shadow: none;
+        border-radius: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        page-break-after: always;
+        break-after: page;
+        overflow: hidden;
+      }
+
+      .page:last-child {
+        page-break-after: avoid;
+        break-after: avoid;
+      }
+
+      .qr-wrap canvas {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .qr-label {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Screen-only toolbar ── -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div>
+        <div class="toolbar-title">KPF Hunt — QR Code Print Sheet</div>
+        <div class="toolbar-sub">100 checkpoints · one QR per A4 page · portrait</div>
+      </div>
+    </div>
+    <button class="btn-print" onclick="window.print()">
+      🖨️ Print All
+    </button>
+  </div>
+
+  <!-- ── QR pages container ── -->
+  <div class="pages-wrapper">
+    <div id="pages"></div>
+  </div>
+
+  <script>
+    (function () {
+      const QR_BASE_URL = 'https://grahesh-dev.github.io/kpf-hunt/scan.html';
+      const TOTAL = 100;
+
+      const container = document.getElementById('pages');
+
+      for (let i = 1; i <= TOTAL; i++) {
+        const url = QR_BASE_URL + '?qr=' + i;
+
+        /* ── Build page DOM ── */
+        const page = document.createElement('div');
+        page.className = 'page';
+
+        /* QR code wrapper — QRCode.js renders into this div */
+        const qrWrap = document.createElement('div');
+        qrWrap.className = 'qr-wrap';
+
+        /* Checkpoint label */
+        const label = document.createElement('div');
+        label.className = 'qr-label';
+        label.textContent = 'Checkpoint ' + i;
+
+        page.appendChild(qrWrap);
+        page.appendChild(label);
+        container.appendChild(page);
+
+        /* Generate QR code into qrWrap */
+        new QRCode(qrWrap, {
+          text: url,
+          width: 300,
+          height: 300,
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      }
+    })();
+  </script>
+
+</body>
+</html>

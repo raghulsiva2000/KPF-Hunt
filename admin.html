@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KPF Hunt — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="admin-page">
+
+  <!-- ── LOGIN SCREEN ── -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-card">
+      <div class="kpf-wordmark">KPF</div>
+      <h2 class="login-title">Admin Access</h2>
+      <p class="login-sub">KPF Hunt Dashboard</p>
+      <div class="alert-error" id="loginError" style="display:none;">Incorrect password.</div>
+      <form id="loginForm" novalidate>
+        <div class="form-group">
+          <label for="loginPw" class="form-label">Password</label>
+          <input type="password" id="loginPw" class="form-input" placeholder="Enter admin password" required />
+        </div>
+        <button type="submit" class="btn-primary" style="width:100%;">Login →</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── DASHBOARD ── -->
+  <div class="admin-wrap" id="adminWrap" style="display:none;">
+
+    <!-- Sidebar -->
+    <nav class="admin-sidebar" id="adminSidebar">
+      <div class="sidebar-logo">
+        <span class="kpf-wordmark-sm">KPF</span>
+        <span class="sidebar-hunt">Hunt</span>
+      </div>
+      <ul class="sidebar-nav">
+        <li><a href="#overview" class="snav-link active" data-section="overview">📊 Overview</a></li>
+        <li><a href="#checkins" class="snav-link" data-section="checkins">📋 Check-ins</a></li>
+        <li><a href="#leaderboard" class="snav-link" data-section="leaderboard">🏆 Leaderboard</a></li>
+        <li><a href="#qrcodes" class="snav-link" data-section="qrcodes">🔲 QR Codes</a></li>
+      </ul>
+      <div class="sidebar-footer">
+        <button class="btn-ghost sidebar-logout" id="logoutBtn">Log out</button>
+      </div>
+    </nav>
+
+    <!-- Main content -->
+    <main class="admin-main">
+
+      <!-- Top bar -->
+      <div class="admin-topbar">
+        <div class="topbar-left">
+          <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+          <h1 class="topbar-title">KPF Hunt — Admin Dashboard</h1>
+        </div>
+        <div class="topbar-right">
+          <span class="live-dot"></span>
+          <span class="refresh-countdown" id="refreshCountdown">Refreshing in 15s</span>
+          <button class="btn-ghost" id="refreshBtn">↻ Refresh</button>
+        </div>
+      </div>
+
+      <!-- ── SECTION: OVERVIEW ── -->
+      <section class="admin-section active" id="section-overview">
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-value" id="statTotal">—</div>
+            <div class="stat-label">Total Check-ins</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statPlayers">—</div>
+            <div class="stat-label">Unique Players</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statCheckpoints">—</div>
+            <div class="stat-label">Checkpoints Covered</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value stat-time" id="statLast">—</div>
+            <div class="stat-label">Last Check-in</div>
+          </div>
+        </div>
+
+        <!-- Top 10 preview -->
+        <div class="admin-card">
+          <div class="card-header">
+            <h2 class="card-title">🏆 Top 10 Players</h2>
+            <a href="leaderboard.html" target="_blank" class="btn-ghost btn-sm">Open TV View →</a>
+          </div>
+          <div class="top10-list" id="top10List">
+            <div class="empty-state">No data yet.</div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ── SECTION: CHECK-INS ── -->
+      <section class="admin-section" id="section-checkins">
+
+        <div class="admin-card">
+          <div class="card-header">
+            <h2 class="card-title">📋 All Check-ins</h2>
+            <div class="card-actions">
+              <button class="btn-ghost btn-sm" id="exportCsvBtn">⬇ Export CSV</button>
+              <button class="btn-danger btn-sm" id="clearDataBtn">🗑 Clear All</button>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="filters-bar">
+            <input type="text" id="filterName" class="filter-input" placeholder="🔍 Search by name…" />
+            <select id="filterOffice" class="filter-select">
+              <option value="">All Offices</option>
+              <option value="London">London</option>
+              <option value="New York">New York</option>
+            </select>
+            <select id="filterCheckpoint" class="filter-select">
+              <option value="">All Checkpoints</option>
+            </select>
+            <button class="btn-ghost btn-sm" id="clearFiltersBtn">✕ Clear Filters</button>
+          </div>
+
+          <div class="table-wrap">
+            <table class="data-table" id="checkinsTable">
+              <thead>
+                <tr>
+                  <th class="sortable" data-col="idx">#</th>
+                  <th class="sortable" data-col="timestamp">Time</th>
+                  <th class="sortable" data-col="name">Name</th>
+                  <th class="sortable" data-col="office">Office</th>
+                  <th class="sortable" data-col="checkpoint">Checkpoint</th>
+                </tr>
+              </thead>
+              <tbody id="checkinsBody">
+                <tr><td colspan="5" class="empty-state">No data yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-footer" id="tableFooter">Showing 0 entries</div>
+        </div>
+
+      </section>
+
+      <!-- ── SECTION: LEADERBOARD ── -->
+      <section class="admin-section" id="section-leaderboard">
+
+        <div class="admin-card">
+          <div class="card-header">
+            <h2 class="card-title">🏆 Full Leaderboard</h2>
+            <a href="leaderboard.html" target="_blank" class="btn-ghost btn-sm">Open TV View →</a>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table" id="lbTable">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Name</th>
+                  <th>Office</th>
+                  <th>Checkpoints</th>
+                  <th>Progress</th>
+                  <th>Last Check-in</th>
+                </tr>
+              </thead>
+              <tbody id="lbBody">
+                <tr><td colspan="6" class="empty-state">No data yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ── SECTION: QR CODES ── -->
+      <section class="admin-section" id="section-qrcodes">
+
+        <div class="admin-card">
+          <div class="card-header">
+            <h2 class="card-title">🔲 QR Code Generator</h2>
+            <a href="print.html" target="_blank" class="btn-primary btn-sm">🖨 Print All 100</a>
+          </div>
+          <div class="qr-generator">
+            <label class="form-label">Generate QR for Checkpoint:</label>
+            <div class="qr-gen-row">
+              <input type="number" id="qrNumInput" class="form-input qr-num-input" min="1" max="100" value="1" placeholder="1–100" />
+              <button class="btn-primary btn-sm" id="genQrBtn">Generate</button>
+            </div>
+            <div class="qr-preview" id="qrPreview">
+              <img id="qrImg" src="" alt="QR Code" class="qr-img" style="display:none;" />
+              <div class="qr-url-row" id="qrUrlRow" style="display:none;">
+                <span class="qr-url-text" id="qrUrlText"></span>
+                <button class="btn-ghost btn-sm" id="copyUrlBtn">Copy URL</button>
+              </div>
+              <div class="qr-label" id="qrLabel"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="card-header">
+            <h2 class="card-title">Quick Preview — All Checkpoints</h2>
+          </div>
+          <p class="section-note">Use the <a href="print.html" target="_blank">Print page</a> for a print-ready grid of all 100 QR codes.</p>
+          <div class="qr-mini-grid" id="qrMiniGrid">
+            <!-- populated by admin.js -->
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>
