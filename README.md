@@ -1,4 +1,4 @@
-# KPF Hunt Game — v8.10
+# KPF Hunt Game — v8.11
 
 A complete multi-page QR-code check-in tracker. Players scan QR codes at up to 100 checkpoints, enter their name and office, and check-ins are stored in **Firebase Realtime Database** via the REST API. Admins monitor live via a password-protected dashboard. A TV-optimised leaderboard auto-updates every 5 seconds.
 
@@ -216,7 +216,7 @@ const QR_BASE_URL = 'https://raghulsiva2000.github.io/KPF-Hunt/scan.html';
 ### Change QR code size in print-qr.html
 In `print-qr.html` inline script, update the `width`/`height` values in the `new QRCode(...)` call:
 ```js
-new QRCode(qrWrap, {
+new QRCode(div, {
   text: url,
   width: 300,   // ← change this
   height: 300,  // ← and this
@@ -341,3 +341,4 @@ Edit `FILES` array to add/remove files from the deploy manifest.
 | **v8.8** | **URL-only update. Firebase URL changed from `kpfhunt-default-rtdb.firebaseio.com` to `kpfhunt-22237-default-rtdb.firebaseio.com` in `js/scan.js`, `js/admin.js`, and `js/leaderboard.js`. GitHub Pages base URL changed from `grahesh-dev.github.io/kpf-hunt` to `raghulsiva-kpf.github.io/KPF-Hunt` in `js/admin.js` (`QR_BASE_URL`) and `print-qr.html` (`QR_BASE_URL`). No logic, UI, or functionality changes.** |
 | **v8.9** | **URL-only update. GitHub Pages base URL changed from `raghulsiva-kpf.github.io/KPF-Hunt` to `raghulsiva2000.github.io/KPF-Hunt` in `js/admin.js` (`QR_BASE_URL`) and `print-qr.html` (`QR_BASE_URL`). `js/scan.js` and `js/leaderboard.js` contained no GitHub Pages URL references — no changes needed there. No logic, UI, or functionality changes.** |
 | **v8.10** | **Two changes: (1) Admin password updated in `js/admin.js` — `ADMIN_PASS` value replaced; password not documented here. (2) Leaderboard tabs added — `leaderboard.html` gains a 3-button tab bar (🌍 Overall / 🇬🇧 London / 🗽 New York); `js/leaderboard.js` gains `activeTab` state, tab-click handlers, and `buildFilteredLeaderboard()` which filters the already-loaded `allData` by office before passing to `buildLeaderboard()`. No new Firebase calls. Tab styles inlined in `leaderboard.html`. No other files changed.** |
+| **v8.11** | **Password-only update. `ADMIN_PASS` in `js/admin.js` confirmed set to the current value (`Kpf@Hunt#2026!Ld`). No code, logic, or UI changes. README version bumped.** |
